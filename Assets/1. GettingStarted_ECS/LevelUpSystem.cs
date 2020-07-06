@@ -19,7 +19,7 @@ public class LevelUpSystem : ComponentSystem { // extend : ComponentSystem from 
             */
 
             levelComponent.level += 1f * Time.DeltaTime; 
-            Debug.Log(levelComponent.level);
+            //Debug.Log(levelComponent.level);
         });
 
         /* And this is it. We don't need to add anything to Testing.cs for a System.*/
