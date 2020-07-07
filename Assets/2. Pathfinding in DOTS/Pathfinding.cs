@@ -25,7 +25,10 @@ public class Pathfinding : MonoBehaviour {
 		}
 		*/
 	private void FindPath(int2 startPos, int2 endPos) {
-		int2 gridSize = new int2(4, 4);
+
+        // a. ----- Setting up the Grid ----
+		
+        int2 gridSize = new int2(4, 4);
 		NativeArray<PathNode> grid = new NativeArray<PathNode>(gridSize.x * gridSize.y, Allocator.Temp);
 
 		for (int m = 0; m < gridSize.x; m++) {
@@ -35,7 +38,7 @@ public class Pathfinding : MonoBehaviour {
 				node.y = n;
 				node.index = CalculateIndex(m, n, gridSize.x);
 				node.gCost = int.MaxValue;
-				node.hCost = CalculateHCost(new int2(m, n), endPos);// from this node onto last given node(destination). Renamed for x and for y into for k and for l to not be confused with coords
+				node.hCost = CalculateHCost(new int2(m, n), endPos);
 				node.CalculateFCost();
 				node.bIsWalkable = true;
 				node.cameFromIndex = -1;
@@ -43,6 +46,12 @@ public class Pathfinding : MonoBehaviour {
 				grid[node.index] = node;
 			}
 		}
+
+		// b. Grab the start node
+
+
+
+
 
 		grid.Dispose();
 
