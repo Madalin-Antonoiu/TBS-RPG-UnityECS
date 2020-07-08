@@ -3,6 +3,7 @@ using Unity.Mathematics; // for int2
 using Unity.Collections; // to create our grid into NativeArray
 using CodeMonkey.Utils;
 using Unity.Jobs; // Multithreading
+using Unity.Burst; // Crazy performance
 
 public class Pathfinding : MonoBehaviour {
 
@@ -39,6 +40,7 @@ public class Pathfinding : MonoBehaviour {
 		}, 1f);
 	}
 
+	[BurstCompile]
 	private struct FindPathJob : IJob {
 
 		public int2 startPos;
@@ -103,17 +105,17 @@ public class Pathfinding : MonoBehaviour {
 			}
 			*/
 
-			// a. Neighbours and the end node
-			NativeArray<int2> neighbours = new NativeArray<int2>(new int2[] {
-			new int2( -1, 0), // Left			⬅️
-			new int2( +1, 0), // Right			➡️
-			new int2( 0, -1), // Down			⬇️
-			new int2( 0, +1), // Up				⬆️
-			new int2( -1, -1), // Left Down		↙️
-			new int2( -1, +1), // Left Up		↖️
-			new int2( +1, -1), // Right Down	↘️
-			new int2( +1, +1), // Right Up		↗️
-		}, Allocator.Temp);
+			// a. Neighbours and the end node, refactored for Burst
+			NativeArray<int2> neighbours = new NativeArray<int2>(8, Allocator.Temp);
+			neighbours[0] = new int2(-1, 0);  // Left			⬅️
+			neighbours[1] = new int2(+1, 0); // Right			➡️
+			neighbours[2] = new int2(0, -1); // Down			⬇️
+			neighbours[3] = new int2(0, +1); // Up				⬆️
+			neighbours[4] = new int2(-1, -1); // Left Down		↙️
+			neighbours[5] = new int2(-1, +1); // Left Up		↖️
+			neighbours[6] = new int2(+1, -1); // Right Down	↘️
+			neighbours[7] = new int2(+1, +1); // Right Up		↗️
+	
 
 			int endNodeIndex = CalculateIndex(endPos.x, endPos.y, gridSize.x);
 
@@ -206,10 +208,10 @@ public class Pathfinding : MonoBehaviour {
 				NativeList<int2> backwardsPath = CalculateBackwardsPath(grid, endNode);
 
 				//Debug.Log("Backwards Path ( from " + startPos + " to " + endPos);
-				foreach (int2 pathPosition in backwardsPath) {
+				//foreach (int2 pathPosition in backwardsPath) {
 
-					//Debug.Log(pathPosition);
-				}
+				//	//Debug.Log(pathPosition);
+				//}
 
 				// Right now wedont care about getting the path back, we just want to calculate it, so dispose of it straight away;
 				backwardsPath.Dispose();
@@ -336,7 +338,7 @@ public class Pathfinding : MonoBehaviour {
 
 	}
 
-	/* ------------------1. Define A* Pathfinding data -----------------------------
+	/* ------------------1. Define A* Pathfinding data for each cell-----------------------------
 		gCost - Move cost from start node onto this node.
 		hCost - Estimated cost from this node onto end node.
 		fCost - Simply G + H.
